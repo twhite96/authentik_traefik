@@ -2,6 +2,8 @@
 
 **Ensure all `CHANGEME` and `domain.tld` values are changed to match YOUR environment!**  
 
+Important changes: Traefik 2.x write up has been renamed from the `main` branch to `traefik2`.  Traefik 3.x and Authentik 2024.x now reside on the `traefik3` branch, which will be the default branch.  
+
 --- 
 
 # Overview  
