@@ -7,7 +7,7 @@ Important changes: Traefik 2.x write up has been renamed from the `main` branch 
 --- 
 
 # Overview  
-This guide assumes that there is a working Traefik v2.7+ running and that the Traefik network is called traefik. I will also be using the embedded outpost instead of a standalone proxy outpost container.
+This guide assumes that there is a working Traefik v3.x+ running and that the Traefik network is called traefik. I will also be using the embedded outpost instead of a standalone proxy outpost container.
 
 Additionally, I am **NOT** allowing Authentik to view the Docker socket (`/var/run/docker.sock`) and auto create providers.  
 
@@ -450,10 +450,13 @@ If you attempt to navigate to a page that IS using Authentik's forwardAuth middl
 ## Applications / Providers  
 In the current version, for this documentation `2024.6.0`, Authentik now includes a Wizard to aid with setting up a Application and Provider instead of manually doing it.  
 
-I am going to set up my `Individual Application` using the Wizard and the `Domain Wide / Catch All` manually.  ONLY to show how you can do either method, both work!  
+I am going to set up my `Individual Application` manually and the `Domain Wide / Catch All` using the Wizard.  ONLY to show how you can do either method, both work!  
 
 > [!NOTE]
-> I am using the embedded outpost.  The embedded outpost requires version `2021.8.1` or newer. This prevents needing the seperate Forward Auth / Proxy Provider container.  
+> I am using the embedded outpost.  The embedded outpost requires version `2021.8.1` or newer. This prevents needing the seperate Forward Auth / Proxy Provider container.
+
+> [!WARNING]
+> Individual applications have a higher priority than the catch all, so you can set up both!
 
 ### Domain Wide / Catch All (forwardAuth) using the Wizard  
 In order for this to "Catch All" you must set a traefik middleware on each service.  Look inside the `compose.yaml`.  This specific snippet is from the `whoami-individual` service inside the `authentik/compose.yaml`:  
