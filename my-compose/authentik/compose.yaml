@@ -165,7 +165,7 @@ services:
     networks:
       - authentik-backend
     secrets:
-      - geoip_acccount_id
+      - geoip_account_id
       - geoip_license_key
     environment:
       - GEOIPUPDATE_EDITION_IDS
