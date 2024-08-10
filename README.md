@@ -129,7 +129,7 @@ AUTHENTIK_EMAIL__FROM=file:///run/secrets/gmail_smtp_username
 ################################################################  
 GEOIPUPDATE_EDITION_IDS="GeoLite2-City GeoLite2-ASN" # Space seperated 
 GEOIPUPDATE_FREQUENCY=8 # Frequency to check for updates, in hours
-GEOIPUPDATE_ACCOUNT_ID_FILE=/run/secrets/geoip_acccount_id
+GEOIPUPDATE_ACCOUNT_ID_FILE=/run/secrets/geoip_account_id
 GEOIPUPDATE_LICENSE_KEY_FILE=/run/secrets/geoip_license_key
 ```
 
@@ -185,10 +185,10 @@ Create a gmail account and input the info.
   ```
 
 Go to https://dev.maxmind.com/geoip/geolite2-free-geolocation-data in order to generate a free license key (https://www.maxmind.com/en/accounts/current/license-key) for use.  
-- `geoip_acccount_id`  
+- `geoip_account_id`  
 - `geoip_license_key`  
   ```bash
-  echo -n 'CHANGEME' > geoip_acccount_id
+  echo -n 'CHANGEME' > geoip_account_id
   echo -n 'CHANGEME' > geoip_license_key
   ```
 
