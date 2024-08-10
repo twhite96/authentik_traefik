@@ -43,8 +43,8 @@ secrets:
   gmail_smtp_password:
     file: ${DOCKERDIR}/secrets/gmail_smtp_password
   ## GeoIP
-  geoip_acccount_id:
-    file: ${DOCKERDIR}/secrets/geoip_acccount_id
+  geoip_account_id:
+    file: ${DOCKERDIR}/secrets/geoip_account_id
   geoip_license_key:
     file: ${DOCKERDIR}/secrets/geoip_license_key
 
