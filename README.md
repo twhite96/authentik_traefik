@@ -11,7 +11,7 @@ This guide assumes that there is a working Traefik v3.x+ running and that the Tr
 
 Additionally, I am **NOT** allowing Authentik to view the Docker socket (`/var/run/docker.sock`) and auto create providers.  
 
-If you want to learn more on how to setup Traefik or just some more detailed explanation, visit Anand and Smart Home Beginner at https://www.smarthomebeginner.com/.  
+If you want to learn more on how to setup Traefik or just some more detailed explanation, visit Anand at [SmartHomeBeginner.com](https://www.smarthomebeginner.com) or his [Docker-Traefik GitHub Repo](https://github.com/anandslab/docker-traefik).  
 
 My folder / repo structure is weird because this is a condensed version of what I have running.  I did not want to leave dead links or bad configurations, so modify to your environment.  
 
