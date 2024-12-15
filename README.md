@@ -22,7 +22,9 @@ docker compose up -d
 ```
 
 <details>  
+
 <summary>minimal compose.yaml</summary>  
+
 ```yaml
 # compose.yaml
 # -----------------------
@@ -152,6 +154,7 @@ services:
       - "./authentik/custom-templates:/templates"
       - /var/run/docker.sock:/var/run/docker.sock
 ```
+
 </details>  
 
 --- 
