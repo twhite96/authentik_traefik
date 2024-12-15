@@ -6,6 +6,156 @@ Important changes: Traefik 2.x write up has been renamed from the `main` branch 
 
 --- 
 
+# Minimal setup  
+After having a discussion with a few folks, some want just a "simple" compose to test this out.  Here you go, no traefik, just a barebones compose.yaml to run as it sits and have a working authentik.  
+
+## Prepare the environment
+```bash
+## Create all required folders
+mkdir -p ./authentik/{redis,postgresql,media,custom-templates}
+## Pull all images before running this file
+grep "image:" compose.yaml | cut -d":" -f2 | xargs -I {} docker pull "{}"
+## Set the value of PUID and PGID to current user if not already set using bash interpolation
+export PUID="${PUID:-$(id -u)}"
+export PGID="${PGID:-$(id -g)}"
+docker compose up -d
+```
+
+<details>  
+<summary>minimal compose.yaml</summary>  
+```yaml
+# compose.yaml
+# -----------------------
+# Preparation
+# -----------------------
+## Create all required folders
+# mkdir -p ./authentik/{redis,postgresql,media,custom-templates}
+## Pull all images before running this file
+# grep "image:" compose.yaml | cut -d":" -f2 | xargs -I {} docker pull "{}"
+## Set the value of PUID and PGID to current user if not already set using bash interpolation
+# export PUID="${PUID:-$(id -u)}"
+# export PGID="${PGID:-$(id -g)}"
+# docker compose up -d
+
+
+# authentik_server      | {"error":"authentik starting","event":"failed to proxy to backend","level":"warning","logger":"authentik.router","timestamp":"2024-12-15T14:23:08Z"}
+#
+# navigate to http://{IP}/if/flow/initial-setup/
+
+
+name: authentik # Project Name
+
+networks:
+  authentik-backend:
+    name: authentik-backend
+  t3_proxy:
+    name: t3_proxy
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.255.224.0/20  # 10.255.224.1 - 10.255.239.254
+          # ip_range specifies the "dhcp scope" for containers
+          ip_range: 10.255.224.0/21  # 10.255.224.1 - 10.255.231.254
+          # stack IPs will be in 10.255.232.x subnet
+
+
+services:
+  authentik_postgresql:
+    image: docker.io/library/postgres:16-alpine
+    container_name: authentik_postgresql
+    shm_size: 128mb
+    restart: unless-stopped
+    user: ${PUID}:${PGID}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 5s
+    networks:
+      - authentik-backend
+    volumes:
+      - "./authentik/postgresql:/var/lib/postgresql/data"
+    environment:
+      - POSTGRES_PASSWORD=postgresql_password
+      - POSTGRES_USER=authentik_db_user
+      - POSTGRES_DB=authentik
+
+  authentik_redis:
+    image: docker.io/library/redis:alpine
+    container_name: authentik_redis
+    command: --save 60 1 --loglevel warning
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      start_period: 20s
+      interval: 30s
+      retries: 5
+      timeout: 3s
+    networks:
+      - authentik-backend
+    volumes:
+      - "./authentik/redis:/data"
+
+  # Use the embedded outpost (2021.8.1+) instead of the seperate Forward Auth / Proxy Provider container
+  authentik_server:
+    image: ghcr.io/goauthentik/server:latest
+    container_name: authentik_server
+    restart: unless-stopped
+    command: server
+    user: ${PUID}:${PGID}
+    depends_on:
+      - authentik_postgresql
+      - authentik_redis
+    networks:
+      - t3_proxy
+      - authentik-backend
+    ports:
+      - 9000:9000
+    environment:
+      - AUTHENTIK_REDIS__HOST=authentik_redis
+      - AUTHENTIK_POSTGRESQL__HOST=authentik_postgresql
+      - AUTHENTIK_POSTGRESQL__NAME=authentik
+      - AUTHENTIK_POSTGRESQL__USER=authentik_db_user
+      - AUTHENTIK_POSTGRESQL__PASSWORD=postgresql_password
+      - AUTHENTIK_LOG_LEVEL=warning
+      - AUTHENTIK_SECRET_KEY=authentik_secret_key__authentik_secret_key
+    volumes:
+      - ./authentik/media:/media"
+      - "./authentik/custom-templates:/templates"
+
+  authentik_worker:
+    image: ghcr.io/goauthentik/server:latest
+    container_name: authentik_worker
+    restart: unless-stopped
+    # Removing `user: root` also prevents the worker from fixing the permissions
+    # on the mounted folders, so when removing this make sure the folders have the correct UID/GID
+    # (1000:1000 by default)
+    # user: root
+    user: ${PUID}:${PGID}
+    command: worker
+    depends_on:
+      - authentik_postgresql
+      - authentik_redis
+    networks:
+      - authentik-backend
+    environment:
+      - AUTHENTIK_REDIS__HOST=authentik_redis
+      - AUTHENTIK_POSTGRESQL__HOST=authentik_postgresql
+      - AUTHENTIK_POSTGRESQL__NAME=authentik
+      - AUTHENTIK_POSTGRESQL__USER=authentik_db_user
+      - AUTHENTIK_POSTGRESQL__PASSWORD=postgresql_password
+      - AUTHENTIK_LOG_LEVEL=warning
+      - AUTHENTIK_SECRET_KEY=authentik_secret_key__authentik_secret_key
+    volumes:
+      - "./authentik/media:/media"
+      - "./authentik/custom-templates:/templates"
+      - /var/run/docker.sock:/var/run/docker.sock
+```
+</details>  
+
+--- 
+
 # Overview  
 This guide assumes that there is a working Traefik v3.x+ running and that the Traefik network is called traefik. I will also be using the embedded outpost instead of a standalone proxy outpost container.
 
